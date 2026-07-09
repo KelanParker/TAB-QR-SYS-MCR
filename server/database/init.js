@@ -2,7 +2,7 @@ const db = require("./db");
 
 function initializeDatabase() {
 
-    // Employees Table
+    // Employees
     db.prepare(`
         CREATE TABLE IF NOT EXISTS employees (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,55 +12,60 @@ function initializeDatabase() {
         )
     `).run();
 
-    // Tablets Table
+    // Tablets
     db.prepare(`
         CREATE TABLE IF NOT EXISTS tablets (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tablet_code TEXT UNIQUE NOT NULL,
-            channel_name TEXT NOT NULL,
-            status TEXT DEFAULT 'AVAILABLE'
+            display_name TEXT NOT NULL
         )
     `).run();
 
-    // Transactions Table
+    // Transactions
     db.prepare(`
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+
             employee_id INTEGER NOT NULL,
             tablet_id INTEGER NOT NULL,
+
             borrow_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             return_time DATETIME,
-            status TEXT DEFAULT 'BORROWED',
 
             FOREIGN KEY(employee_id) REFERENCES employees(id),
             FOREIGN KEY(tablet_id) REFERENCES tablets(id)
         )
     `).run();
 
-    const tabletCount = db
-    .prepare("SELECT COUNT(*) AS count FROM tablets")
-    .get();
+    const count = db.prepare(
+        "SELECT COUNT(*) AS count FROM tablets"
+    ).get();
 
-if (tabletCount.count === 0) {
-    const insert = db.prepare(`
-        INSERT INTO tablets (tablet_code, channel_name)
-        VALUES (?, ?)
-    `);
+    if (count.count === 0) {
 
-    const tablets = [
-        ["TAB001", "Hiru FM"],
-        ["TAB002", "Sun FM"],
-        ["TAB003", "Gold FM"],
-        ["TAB004", "Shaa FM"],
-        ["TAB005", "Sooriyan FM"]
-    ];
+        const insert = db.prepare(`
+            INSERT INTO tablets (tablet_code, display_name)
+            VALUES (?, ?)
+        `);
 
-    for (const tablet of tablets) {
-        insert.run(...tablet);
+        const tablets = [
+
+            ["TAB001", "Hiru FM"],
+            ["TAB002", "Sun FM"],
+            ["TAB003", "Gold FM"],
+            ["TAB004", "Shaa FM"],
+            ["TAB005", "Sooriyan FM"],
+            ["TAB006", "Additional 1"],
+            ["TAB007", "Additional 2"]
+
+        ];
+
+        for (const tablet of tablets) {
+            insert.run(...tablet);
+        }
+
+        console.log("✅ Default tablets added");
     }
-
-    console.log("✅ Default tablets added");
-}
 
     console.log("✅ Database Initialized");
 }
