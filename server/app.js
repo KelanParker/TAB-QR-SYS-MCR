@@ -5,6 +5,9 @@ require("dotenv").config();
 const db = require("./database/db");
 const initializeDatabase = require("./database/init");
 const tabletRoutes = require("./routes/tabletRoutes");
+const employeeRoutes = require("./routes/employeeRoutes");
+const tabletLookupRoutes = require("./routes/tabletLookupRoutes");  
+const transactionRoutes = require("./routes/transactionRoutes");
 
 const app = express();
 
@@ -14,7 +17,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/tablets", tabletRoutes);
-
+app.use("/api/employees", employeeRoutes);
+app.use("/api/tablets/lookup", tabletLookupRoutes);
+app.use("/api/transactions", transactionRoutes);
 app.get("/", (req, res) => {
     res.send("MCR Tablet Management Backend Running 🚀");
 });

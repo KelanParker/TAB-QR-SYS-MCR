@@ -1,0 +1,215 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../database/db");
+
+/*
+=====================================
+ISSUE TABLETS
+POST /api/transactions/issue
+=====================================
+*/
+
+router.post("/issue", (req, res) => {
+
+    const { employeeCode, tabletCodes } = req.body;
+
+    if (!employeeCode || !Array.isArray(tabletCodes) || tabletCodes.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "Employee code and at least one tablet are required."
+        });
+    }
+
+    // Find employee
+    const employee = db.prepare(`
+        SELECT *
+        FROM employees
+        WHERE employee_no = ?
+    `).get(employeeCode);
+
+    if (!employee) {
+        return res.status(404).json({
+            success: false,
+            message: "Employee not found."
+        });
+    }
+
+    const insertTransaction = db.prepare(`
+        INSERT INTO transactions
+        (
+            employee_id,
+            tablet_id
+        )
+        VALUES (?, ?)
+    `);
+
+    const checkActive = db.prepare(`
+        SELECT id
+        FROM transactions
+        WHERE tablet_id = ?
+        AND return_time IS NULL
+    `);
+
+    const findTablet = db.prepare(`
+        SELECT *
+        FROM tablets
+        WHERE tablet_code = ?
+    `);
+
+    const issuedTablets = [];
+    const skippedTablets = [];
+
+    for (const tabletCode of tabletCodes) {
+
+        const tablet = findTablet.get(tabletCode);
+
+        if (!tablet) {
+            skippedTablets.push({
+                tabletCode,
+                reason: "Tablet not found"
+            });
+            continue;
+        }
+
+        const active = checkActive.get(tablet.id);
+
+        if (active) {
+            skippedTablets.push({
+                tabletCode,
+                reason: "Already issued"
+            });
+            continue;
+        }
+
+        insertTransaction.run(
+            employee.id,
+            tablet.id
+        );
+
+        issuedTablets.push({
+            tabletCode,
+            displayName: tablet.display_name
+        });
+
+    }
+
+    return res.json({
+
+        success: true,
+
+        employee: {
+            employee_no: employee.employee_no,
+            name: employee.name
+        },
+
+        issuedTablets,
+
+        skippedTablets
+
+    });
+
+});
+
+
+/*
+=====================================
+GET ACTIVE TABLETS
+GET /api/transactions/active/:employeeCode
+=====================================
+*/
+
+router.get("/active/:employeeCode", (req, res) => {
+
+    const employee = db.prepare(`
+        SELECT *
+        FROM employees
+        WHERE employee_no = ?
+    `).get(req.params.employeeCode);
+
+    if (!employee) {
+        return res.status(404).json({
+            success: false,
+            message: "Employee not found."
+        });
+    }
+
+    const tablets = db.prepare(`
+        SELECT
+
+            transactions.id AS transactionId,
+            tablets.tablet_code,
+            tablets.display_name,
+            transactions.borrow_time
+
+        FROM transactions
+
+        JOIN tablets
+        ON tablets.id = transactions.tablet_id
+
+        WHERE
+            transactions.employee_id = ?
+        AND
+            transactions.return_time IS NULL
+
+        ORDER BY transactions.borrow_time
+
+    `).all(employee.id);
+
+    res.json({
+
+        success: true,
+
+        employee,
+
+        tablets
+
+    });
+
+});
+
+
+/*
+=====================================
+RETURN TABLETS
+POST /api/transactions/return
+=====================================
+*/
+
+router.post("/return", (req, res) => {
+
+    const { transactionIds } = req.body;
+
+    if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
+
+        return res.status(400).json({
+
+            success: false,
+            message: "No tablets selected."
+
+        });
+
+    }
+
+    const update = db.prepare(`
+        UPDATE transactions
+        SET return_time = CURRENT_TIMESTAMP
+        WHERE id = ?
+    `);
+
+    for (const id of transactionIds) {
+
+        update.run(id);
+
+    }
+
+    res.json({
+
+        success: true,
+        message: "Selected tablets returned successfully."
+
+    });
+
+});
+
+
+module.exports = router;

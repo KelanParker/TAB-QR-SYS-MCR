@@ -1,7 +1,7 @@
-import Dashboard from "./pages/Dashboard";
+import IssueTablet from "./pages/IssueTablet";
 
 function App() {
-  return <Dashboard />;
+    return <IssueTablet />;
 }
 
 export default App;
