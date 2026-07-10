@@ -8,6 +8,7 @@ const tabletRoutes = require("./routes/tabletRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const tabletLookupRoutes = require("./routes/tabletLookupRoutes");  
 const transactionRoutes = require("./routes/transactionRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/tablets", tabletRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/tablets/lookup", tabletLookupRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.get("/", (req, res) => {
     res.send("MCR Tablet Management Backend Running 🚀");
 });

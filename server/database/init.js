@@ -58,14 +58,14 @@ function initializeDatabase() {
         `);
 
         const tablets = [
-            ["TAB001", "Hiru FM"],
-            ["TAB002", "Sun FM"],
-            ["TAB003", "Gold FM"],
-            ["TAB004", "Shaa FM"],
-            ["TAB005", "Sooriyan FM"],
-            ["TAB006", "Additional 1"],
-            ["TAB007", "Additional 2"]
-        ];
+    ["TAB001", "Hiru FM - 1"],
+    ["TAB002", "Hiru FM - 2"],
+    ["TAB003", "Shaa FM - 1"],
+    ["TAB004", "Shaa FM - 2"],
+    ["TAB005", "Sooriyan FM - 1"],
+    ["TAB006", "Sooriyan FM - 2"],
+    ["TAB007", "Gold FM"]
+];
 
         for (const tablet of tablets) {
             insertTablet.run(...tablet);

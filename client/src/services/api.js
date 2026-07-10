@@ -126,3 +126,12 @@ export async function returnTablets(transactionIds) {
     return response.json();
 
 }
+
+
+export async function getDashboard() {
+
+    const response = await fetch("http://localhost:5000/api/dashboard");
+
+    return response.json();
+
+}
