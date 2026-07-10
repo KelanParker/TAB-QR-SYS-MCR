@@ -67,10 +67,17 @@ export async function issueTablets(employeeCode, tabletCodes) {
 
     );
 
-    return response.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(data.message);
+
+    }
+
+    return data;
 
 }
-
 
 /*
 ==================================
@@ -123,15 +130,62 @@ export async function returnTablets(transactionIds) {
 
     );
 
-    return response.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(data.message);
+
+    }
+
+    return data;
 
 }
 
+/*
+==================================
+DASHBOARD
+==================================
+*/
 
 export async function getDashboard() {
 
-    const response = await fetch("http://localhost:5000/api/dashboard");
+    const response = await fetch(
 
-    return response.json();
+        `${API_BASE_URL}/dashboard`
+
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(data.message);
+
+    }
+
+    return data;
+
+}
+
+/*
+==================================
+HISTORY
+==================================
+*/
+
+export async function getHistory() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/history`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message);
+    }
+
+    return data;
 
 }

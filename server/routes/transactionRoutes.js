@@ -57,28 +57,25 @@ router.post("/issue", (req, res) => {
     `);
 
     const issuedTablets = [];
-    const skippedTablets = [];
 
     for (const tabletCode of tabletCodes) {
 
         const tablet = findTablet.get(tabletCode);
 
         if (!tablet) {
-            skippedTablets.push({
-                tabletCode,
-                reason: "Tablet not found"
+            return res.status(404).json({
+                success: false,
+                message: `Tablet ${tabletCode} not found.`
             });
-            continue;
         }
 
         const active = checkActive.get(tablet.id);
 
         if (active) {
-            skippedTablets.push({
-                tabletCode,
-                reason: "Already issued"
+            return res.status(400).json({
+                success: false,
+                message: `${tablet.display_name} is already issued.`
             });
-            continue;
         }
 
         insertTransaction.run(
@@ -102,9 +99,7 @@ router.post("/issue", (req, res) => {
             name: employee.name
         },
 
-        issuedTablets,
-
-        skippedTablets
+        issuedTablets
 
     });
 
@@ -182,13 +177,17 @@ router.post("/return", (req, res) => {
     if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
 
         return res.status(400).json({
-
             success: false,
             message: "No tablets selected."
-
         });
 
     }
+
+    const findTransaction = db.prepare(`
+        SELECT *
+        FROM transactions
+        WHERE id = ?
+    `);
 
     const update = db.prepare(`
         UPDATE transactions
@@ -197,6 +196,26 @@ router.post("/return", (req, res) => {
     `);
 
     for (const id of transactionIds) {
+
+        const transaction = findTransaction.get(id);
+
+        if (!transaction) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found."
+            });
+
+        }
+
+        if (transaction.return_time !== null) {
+
+            return res.status(400).json({
+                success: false,
+                message: "This tablet has already been returned."
+            });
+
+        }
 
         update.run(id);
 
