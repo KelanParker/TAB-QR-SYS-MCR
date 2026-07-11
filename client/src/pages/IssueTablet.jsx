@@ -14,6 +14,8 @@ function IssueTablet() {
   const [tabletCode, setTabletCode] = useState("");
   const [selectedTablets, setSelectedTablets] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   const employeeInputRef = useRef(null);
   const tabletInputRef = useRef(null);
 
@@ -111,73 +113,74 @@ function IssueTablet() {
 
     if (!employee) {
 
-        toast.error("Select an employee.");
+      toast.error("Select an employee.");
 
-        return;
+      return;
 
     }
 
     if (selectedTablets.length === 0) {
 
-        toast.error("Select at least one tablet.");
+      toast.error("Select at least one tablet.");
 
-        return;
+      return;
 
     }
 
     const result = await Swal.fire({
 
-        title: "Issue Tablets?",
+      title: "Issue Tablets?",
 
-        html: `
+      html: `
 
-            <div style="text-align:left">
+        <div style="text-align:left">
 
-                <strong>Employee</strong>
+          <strong>Employee</strong>
 
-                <br>
+          <br>
 
-                ${employee.name}
+          ${employee.name}
 
-                <br><br>
+          <br><br>
 
-                <strong>Tablets</strong>
+          <strong>Tablets</strong>
 
-                <ul style="margin-top:8px">
+          <ul style="margin-top:8px">
 
-                    ${selectedTablets
-                        .map(
-                            tablet =>
-                                `<li>${tablet.display_name}</li>`
-                        )
-                        .join("")}
+            ${selectedTablets
+              .map(
+                tablet =>
+                  `<li>${tablet.display_name}</li>`
+              )
+              .join("")}
 
-                </ul>
+          </ul>
 
-            </div>
+        </div>
 
-        `,
+      `,
 
-        icon: "question",
+      icon: "question",
 
-        showCancelButton: true,
+      showCancelButton: true,
 
-        confirmButtonText: "Issue",
+      confirmButtonText: "Issue",
 
-        cancelButtonText: "Cancel",
+      cancelButtonText: "Cancel",
 
-        confirmButtonColor: "#16a34a"
+      confirmButtonColor: "#16a34a"
 
     });
 
     if (!result.isConfirmed) {
 
-        return;
+      return;
 
     }
 
-    try {
+    setLoading(true);
 
+    try {
         const response = await issueTablets(
 
             employee.employee_no,
@@ -210,16 +213,21 @@ function IssueTablet() {
 
     catch (error) {
 
-    toast.error(
+        toast.error(
 
-        error?.message || "Issue failed."
+            error?.message || "Issue failed."
 
-    );
+        );
+
+    }
+
+    finally {
+
+        setLoading(false);
+
+    }
 
 }
-
-}
-
 
   return (
 
@@ -404,10 +412,15 @@ function IssueTablet() {
 
         <button
           onClick={handleIssue}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold"
+          disabled={loading || selectedTablets.length === 0}
+          className={`w-full py-3 rounded-lg font-semibold text-white transition ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
 
-          Issue Tablets
+          {loading ? "Issuing..." : "Issue Tablets"}
 
         </button>
 

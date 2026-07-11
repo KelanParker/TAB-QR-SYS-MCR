@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../database/db");
+const logActivity = require("../utils/activityLogger");
 
 /*
 =====================================
@@ -14,13 +15,14 @@ router.post("/issue", (req, res) => {
     const { employeeCode, tabletCodes } = req.body;
 
     if (!employeeCode || !Array.isArray(tabletCodes) || tabletCodes.length === 0) {
+
         return res.status(400).json({
             success: false,
             message: "Employee code and at least one tablet are required."
         });
+
     }
 
-    // Find employee
     const employee = db.prepare(`
         SELECT *
         FROM employees
@@ -28,10 +30,12 @@ router.post("/issue", (req, res) => {
     `).get(employeeCode);
 
     if (!employee) {
+
         return res.status(404).json({
             success: false,
             message: "Employee not found."
         });
+
     }
 
     const insertTransaction = db.prepare(`
@@ -63,24 +67,33 @@ router.post("/issue", (req, res) => {
         const tablet = findTablet.get(tabletCode);
 
         if (!tablet) {
+
             return res.status(404).json({
                 success: false,
                 message: `Tablet ${tabletCode} not found.`
             });
+
         }
 
         const active = checkActive.get(tablet.id);
 
         if (active) {
+
             return res.status(400).json({
                 success: false,
                 message: `${tablet.display_name} is already issued.`
             });
+
         }
 
         insertTransaction.run(
             employee.id,
             tablet.id
+        );
+
+        logActivity(
+            "ISSUE",
+            `${employee.name} issued ${tablet.display_name}`
         );
 
         issuedTablets.push({
@@ -90,8 +103,7 @@ router.post("/issue", (req, res) => {
 
     }
 
-    return res.json({
-
+    res.json({
         success: true,
 
         employee: {
@@ -100,7 +112,6 @@ router.post("/issue", (req, res) => {
         },
 
         issuedTablets
-
     });
 
 });
@@ -122,10 +133,12 @@ router.get("/active/:employeeCode", (req, res) => {
     `).get(req.params.employeeCode);
 
     if (!employee) {
+
         return res.status(404).json({
             success: false,
             message: "Employee not found."
         });
+
     }
 
     const tablets = db.prepare(`
@@ -139,7 +152,7 @@ router.get("/active/:employeeCode", (req, res) => {
         FROM transactions
 
         JOIN tablets
-        ON tablets.id = transactions.tablet_id
+            ON tablets.id = transactions.tablet_id
 
         WHERE
             transactions.employee_id = ?
@@ -147,17 +160,12 @@ router.get("/active/:employeeCode", (req, res) => {
             transactions.return_time IS NULL
 
         ORDER BY transactions.borrow_time
-
     `).all(employee.id);
 
     res.json({
-
         success: true,
-
         employee,
-
         tablets
-
     });
 
 });
@@ -219,16 +227,30 @@ router.post("/return", (req, res) => {
 
         update.run(id);
 
+        const activity = db.prepare(`
+            SELECT
+                tablets.display_name,
+                employees.name AS employee_name
+            FROM transactions
+            JOIN tablets
+                ON tablets.id = transactions.tablet_id
+            JOIN employees
+                ON employees.id = transactions.employee_id
+            WHERE transactions.id = ?
+        `).get(id);
+
+        logActivity(
+            "RETURN",
+            `${activity.employee_name} returned ${activity.display_name}`
+        );
+
     }
 
     res.json({
-
         success: true,
         message: "Selected tablets returned successfully."
-
     });
 
 });
-
 
 module.exports = router;

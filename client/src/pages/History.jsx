@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getHistory } from "../services/api";
 
 function History() {
@@ -6,6 +6,7 @@ function History() {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
 
@@ -31,6 +32,10 @@ function History() {
 
         loadHistory();
 
+        const interval = setInterval(loadHistory, 10000);
+
+        return () => clearInterval(interval);
+
     }, []);
 
     function formatDate(date) {
@@ -41,17 +46,51 @@ function History() {
 
     }
 
+    const filteredHistory = useMemo(() => {
+
+        return history.filter(item => {
+
+            const keyword = search.toLowerCase();
+
+            return (
+
+                item.employee_name.toLowerCase().includes(keyword) ||
+
+                item.employee_no.toLowerCase().includes(keyword) ||
+
+                item.tablet_code.toLowerCase().includes(keyword) ||
+
+                item.display_name.toLowerCase().includes(keyword)
+
+            );
+
+        });
+
+    }, [history, search]);
+
     return (
 
         <div className="min-h-screen bg-gray-100 py-10">
 
             <div className="max-w-6xl mx-auto">
 
-                <h1 className="text-4xl font-bold mb-8">
+                <h1 className="text-4xl font-bold mb-6">
 
                     Transaction History
 
                 </h1>
+
+                <input
+
+                    className="w-full mb-6 border rounded-lg p-3"
+
+                    placeholder="Search employee, tablet code or tablet name..."
+
+                    value={search}
+
+                    onChange={(e) => setSearch(e.target.value)}
+
+                />
 
                 {loading && (
 
@@ -73,11 +112,11 @@ function History() {
 
                 )}
 
-                {!loading && !error && history.length === 0 && (
+                {!loading && !error && filteredHistory.length === 0 && (
 
                     <div className="bg-white rounded-xl shadow p-6">
 
-                        No transactions found.
+                        No matching transactions found.
 
                     </div>
 
@@ -85,11 +124,14 @@ function History() {
 
                 <div className="space-y-5">
 
-                    {history.map((item) => (
+                    {filteredHistory.map((item) => (
 
                         <div
+
                             key={item.id}
+
                             className="bg-white rounded-xl shadow-md p-6 border border-gray-200"
+
                         >
 
                             <div className="flex justify-between items-center mb-4">

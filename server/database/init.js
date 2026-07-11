@@ -25,6 +25,16 @@ function initializeDatabase() {
         )
     `).run();
 
+    // Activity Logs
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS activity_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        action TEXT NOT NULL,
+        details TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`).run();
+
     // =========================
     // Transactions Table
     // =========================

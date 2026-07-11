@@ -10,6 +10,7 @@ const tabletLookupRoutes = require("./routes/tabletLookupRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const historyRoutes = require("./routes/historyRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/tablets/lookup", tabletLookupRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/history", historyRoutes);
+app.use("/api/activity", activityRoutes);
 
 
 app.get("/", (req, res) => {

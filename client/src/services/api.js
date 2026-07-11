@@ -168,6 +168,16 @@ export async function getDashboard() {
 
 }
 
+export async function getDashboardStats() {
+
+    const response = await fetch(
+        "http://localhost:5000/api/dashboard/stats"
+    );
+
+    return response.json();
+
+}
+
 /*
 ==================================
 HISTORY
@@ -187,5 +197,152 @@ export async function getHistory() {
     }
 
     return data;
+
+}
+
+/*
+==================================
+ADMIN - EMPLOYEES
+==================================
+*/
+
+export async function getEmployees() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/employees`
+    );
+
+    return response.json();
+
+}
+
+export async function addEmployee(employee_no, name) {
+
+    const response = await fetch(
+
+        `${API_BASE_URL}/employees`,
+
+        {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                employee_no,
+                name
+
+            })
+
+        }
+
+    );
+
+    return response.json();
+
+}
+
+export async function deleteEmployee(id) {
+
+    const response = await fetch(
+
+        `${API_BASE_URL}/employees/${id}`,
+
+        {
+
+            method: "DELETE"
+
+        }
+
+    );
+
+    return response.json();
+
+}
+
+
+/*
+==================================
+ADMIN - TABLETS
+==================================
+*/
+
+export async function getTablets() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/tablets`
+    );
+
+    return response.json();
+
+}
+
+export async function addTablet(tablet_code, display_name) {
+
+    const response = await fetch(
+
+        `${API_BASE_URL}/tablets`,
+
+        {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                tablet_code,
+                display_name
+
+            })
+
+        }
+
+    );
+
+    return response.json();
+
+}
+
+export async function deleteTablet(id) {
+
+    const response = await fetch(
+
+        `${API_BASE_URL}/tablets/${id}`,
+
+        {
+
+            method: "DELETE"
+
+        }
+
+    );
+
+    return response.json();
+
+}
+
+/*
+==================================
+ACTIVITY LOGS
+==================================
+*/
+
+export async function getActivityLogs() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/activity`
+    );
+
+    return response.json();
 
 }

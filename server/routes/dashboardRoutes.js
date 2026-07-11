@@ -51,3 +51,50 @@ router.get("/", (req, res) => {
 });
 
 module.exports = router;
+
+/*
+=====================================
+DASHBOARD STATS
+GET /api/dashboard/stats
+=====================================
+*/
+
+router.get("/stats", (req, res) => {
+
+    const totalTablets = db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM tablets
+    `).get().count;
+
+    const borrowed = db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM transactions
+        WHERE return_time IS NULL
+    `).get().count;
+
+    const available = totalTablets - borrowed;
+
+    const employees = db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM employees
+    `).get().count;
+
+    res.json({
+
+        success: true,
+
+        stats: {
+
+            totalTablets,
+
+            available,
+
+            borrowed,
+
+            employees
+
+        }
+
+    });
+
+});

@@ -11,6 +11,7 @@ import IssueTablet from "./pages/IssueTablet";
 import ReturnTablet from "./pages/ReturnTablet";
 import History from "./pages/History";
 import Admin from "./pages/Admin";
+import Activity from "./pages/Activity";
 
 function App() {
   return (
@@ -36,14 +37,19 @@ function App() {
         />
 
         <Route
-          path="/history"
-          element={<History />}
-        />
+  path="/history"
+  element={<History />}
+/>
 
-        <Route
-          path="/admin"
-          element={<Admin />}
-        />
+<Route
+  path="/activity"
+  element={<Activity />}
+/>
+
+<Route
+  path="/admin"
+  element={<Admin />}
+/>
 
       </Routes>
 

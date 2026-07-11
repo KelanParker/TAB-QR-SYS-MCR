@@ -31,12 +31,16 @@ function Navbar() {
           </NavLink>
 
           <NavLink to="/history" className={linkClass}>
-            History
-          </NavLink>
+    History
+</NavLink>
 
-          <NavLink to="/admin" className={linkClass}>
-            Admin
-          </NavLink>
+<NavLink to="/activity" className={linkClass}>
+    Activity
+</NavLink>
+
+<NavLink to="/admin" className={linkClass}>
+    Admin
+</NavLink>
 
         </div>
 
