@@ -7,73 +7,45 @@ import {
 } from "../services/api";
 
 function Dashboard() {
-
     const [tablets, setTablets] = useState([]);
-
     const [stats, setStats] = useState({
-
         totalTablets: 0,
         available: 0,
         borrowed: 0,
         employees: 0
-
     });
 
     async function loadDashboard() {
-
         try {
-
             const [dashboardData, statsData] = await Promise.all([
-
                 getDashboard(),
                 getDashboardStats()
-
             ]);
-
             setTablets(dashboardData.tablets);
-
             if (statsData.success) {
-
                 setStats(statsData.stats);
-
             }
-
         } catch (error) {
-
             console.error("Failed to load dashboard:", error);
-
         }
-
     }
 
     useEffect(() => {
-
         loadDashboard();
-
         const interval = setInterval(loadDashboard, 10000);
-
         return () => clearInterval(interval);
-
     }, []);
 
     return (
-
         <div className="min-h-screen bg-gray-100">
-
             <div className="max-w-7xl mx-auto p-8">
-
                 <h1 className="text-4xl font-bold mb-2">
                     MCR Tablet Management System
                 </h1>
-
                 <p className="text-gray-500 mb-8">
                     Live Tablet Status
                 </p>
-
-                {/* Dashboard Statistics */}
-
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-
                     <StatCard
                         title="Total Tablets"
                         value={stats.totalTablets}
@@ -101,30 +73,18 @@ function Dashboard() {
                         bgColor="bg-blue-50 border border-blue-200"
                         textColor="text-blue-700"
                     />
-
                 </div>
-
-                {/* Tablet Cards */}
-
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
                     {tablets.map((tablet) => (
-
                         <TabletCard
                             key={tablet.id}
                             tablet={tablet}
                         />
-
                     ))}
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default Dashboard;
