@@ -5,6 +5,7 @@ import {
   getActiveTablets,
   returnTablets,
 } from "../services/api";
+import QRScannerModal from "../components/QRScannerModal";
 
 function ReturnTablet() {
 
@@ -15,6 +16,10 @@ function ReturnTablet() {
   const [borrowedTablets, setBorrowedTablets] = useState([]);
 
   const [selectedTransactions, setSelectedTransactions] = useState([]);
+
+  const [showEmployeeScanner, setShowEmployeeScanner] = useState(false);
+
+  const [showTabletScanner, setShowTabletScanner] = useState(false);
 
   async function handleLookup(code) {
 
@@ -114,6 +119,9 @@ function ReturnTablet() {
 
       setSelectedTransactions([]);
 
+      setShowEmployeeScanner(false);
+setShowTabletScanner(false);
+
     }
 
     catch {
@@ -123,6 +131,45 @@ function ReturnTablet() {
     }
 
   }
+
+  function handleEmployeeQR(code) {
+  const value = code.trim().toUpperCase();
+
+  if (!value.startsWith("EMP")) {
+    toast.error("Invalid Employee QR");
+    return;
+  }
+
+  setEmployeeCode(value);
+  handleLookup(value);
+}
+
+function handleTabletQR(code) {
+  const value = code.trim().toUpperCase();
+
+  const tablet = borrowedTablets.find(
+    (t) => t.tablet_code === value
+  );
+
+  if (!tablet) {
+    toast.error("Tablet not borrowed by this employee.");
+    return;
+  }
+
+  if (selectedTransactions.includes(tablet.transactionId)) {
+    toast("Tablet already selected.");
+    return;
+}
+
+setSelectedTransactions((prev) => [
+    ...prev,
+    tablet.transactionId,
+]);
+
+toast.success(`${tablet.display_name} selected`);
+}
+
+
 
   return (
 
@@ -142,26 +189,26 @@ function ReturnTablet() {
 
         </label>
 
-        <input
+        <div className="flex gap-2">
+  <input
+    className="flex-1 border rounded-lg p-3"
+    placeholder="EMP001"
+    value={employeeCode}
+    onChange={(e) => {
+      const code = e.target.value.toUpperCase();
+      setEmployeeCode(code);
+      handleLookup(code);
+    }}
+  />
 
-          className="w-full border rounded-lg p-3"
-
-          placeholder="EMP001"
-
-          value={employeeCode}
-
-          onChange={(e) => {
-
-            const code =
-              e.target.value.toUpperCase();
-
-            setEmployeeCode(code);
-
-            handleLookup(code);
-
-          }}
-
-        />
+  <button
+    type="button"
+    onClick={() => setShowEmployeeScanner(true)}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg"
+  >
+    Scan QR
+  </button>
+</div>
 
         {employee && (
 
@@ -185,11 +232,19 @@ function ReturnTablet() {
 
         <div className="mt-8">
 
-          <h2 className="text-xl font-bold mb-4">
+          <div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-bold">
+    Borrowed Tablets
+  </h2>
 
-            Borrowed Tablets
-
-          </h2>
+  <button
+    type="button"
+    onClick={() => setShowTabletScanner(true)}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+  >
+    Scan QR
+  </button>
+</div>
 
           {
 
@@ -294,6 +349,18 @@ function ReturnTablet() {
         </button>
 
       </div>
+
+      <QRScannerModal
+  open={showEmployeeScanner}
+  onClose={() => setShowEmployeeScanner(false)}
+  onScan={handleEmployeeQR}
+/>
+
+<QRScannerModal
+  open={showTabletScanner}
+  onClose={() => setShowTabletScanner(false)}
+  onScan={handleTabletQR}
+/>
 
     </div>
 
