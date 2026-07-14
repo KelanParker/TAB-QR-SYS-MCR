@@ -173,25 +173,83 @@ toast.success(`${tablet.display_name} selected`);
 
   return (
 
-    <div className="min-h-screen bg-gray-100 py-10">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 text-slate-900">
 
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
 
-        <h1 className="text-3xl font-bold mb-8">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur">
 
-          Return Tablets
+          <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-6 sm:px-8 sm:py-8">
 
-        </h1>
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 shadow-sm">
+              Tablet returns
+            </span>
 
-        <label className="block mb-2 font-semibold">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
-          Employee Code
+              <div>
 
-        </label>
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
 
-        <div className="flex gap-2">
+                  Return Tablets
+
+                </h1>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+
+                  Look up an employee, review active tablets, and return selected items in one flow.
+
+                </p>
+
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+
+                  Selected
+
+                </p>
+
+                <p className="mt-1 text-lg font-semibold text-slate-950">
+
+                  {selectedTransactions.length}
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="space-y-8 px-5 py-6 sm:px-8 sm:py-8">
+
+            <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+
+              <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+
+                <div>
+
+                  <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+
+                    Employee
+
+                  </h2>
+
+                  <p className="text-sm text-slate-500">
+
+                    Scan or enter the employee code to load borrowed tablets.
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
   <input
-    className="flex-1 border rounded-lg p-3"
+    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
     placeholder="EMP001"
     value={employeeCode}
     onChange={(e) => {
@@ -204,149 +262,201 @@ toast.success(`${tablet.display_name} selected`);
   <button
     type="button"
     onClick={() => setShowEmployeeScanner(true)}
-    className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg"
+    className="inline-flex h-12 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
   >
     Scan QR
   </button>
 </div>
 
-        {employee && (
+              {employee && (
 
-          <div className="mt-4 p-3 rounded-lg bg-green-50 border border-green-300">
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 shadow-sm">
 
-            <p className="font-bold">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
 
-              ✅ {employee.name}
+                    Employee loaded
 
-            </p>
+                  </p>
 
-            <p className="text-gray-600">
+                  <p className="mt-2 text-base font-semibold text-emerald-950">
 
-              {employee.employee_no}
+                    ✅ {employee.name}
 
-            </p>
+                  </p>
 
-          </div>
+                  <p className="mt-1 text-sm text-emerald-700">
 
-        )}
+                    {employee.employee_no}
 
-        <div className="mt-8">
+                  </p>
 
-          <div className="flex justify-between items-center mb-4">
-  <h2 className="text-xl font-bold">
-    Borrowed Tablets
-  </h2>
+                </div>
 
-  <button
-    type="button"
-    onClick={() => setShowTabletScanner(true)}
-    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-  >
-    Scan QR
-  </button>
-</div>
+              )}
 
-          {
+            </section>
 
-            borrowedTablets.length === 0
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
 
-            ?
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
 
-            (
+                <div>
 
-              <p className="text-gray-500">
+                  <h2 className="text-lg font-semibold tracking-tight text-slate-950">
 
-                No active tablets.
+                    Borrowed Tablets
 
-              </p>
+                  </h2>
 
-            )
+                  <p className="text-sm text-slate-500">
 
-            :
+                    Select the tablets you want to return.
 
-            (
+                  </p>
 
-              <div className="space-y-3">
+                </div>
 
-                {
+                <button
 
-                  borrowedTablets.map(
+                  type="button"
 
-                    tablet => (
+                  onClick={() => setShowTabletScanner(true)}
 
-                      <label
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
 
-                        key={tablet.transactionId}
+                >
 
-                        className="flex justify-between items-center border rounded-lg p-4 cursor-pointer"
+                  Scan QR
 
-                      >
-
-                        <div>
-
-                          <p className="font-semibold">
-
-                            {tablet.display_name}
-
-                          </p>
-
-                          <p className="text-sm text-gray-500">
-
-                            {tablet.tablet_code}
-
-                          </p>
-
-                        </div>
-
-                        <input
-
-                          type="checkbox"
-
-                          checked={selectedTransactions.includes(
-
-                            tablet.transactionId
-
-                          )}
-
-                          onChange={() =>
-
-                            toggleTransaction(
-
-                              tablet.transactionId
-
-                            )
-
-                          }
-
-                        />
-
-                      </label>
-
-                    )
-
-                  )
-
-                }
+                </button>
 
               </div>
 
-            )
+              {
 
-          }
+                borrowedTablets.length === 0
+
+                ?
+
+                (
+
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+
+                    <p className="text-base font-medium text-slate-900">
+
+                      No active tablets.
+
+                    </p>
+
+                    <p className="mt-2 text-sm text-slate-500">
+
+                      Load an employee to see tablets currently assigned to them.
+
+                    </p>
+
+                  </div>
+
+                )
+
+                :
+
+                (
+
+                  <div className="space-y-3">
+
+                    {
+
+                      borrowedTablets.map(
+
+                        tablet => (
+
+                          <label
+
+                            key={tablet.transactionId}
+
+                            className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl border p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                              selectedTransactions.includes(tablet.transactionId)
+                                ? "border-indigo-200 bg-indigo-50/70"
+                                : "border-slate-200 bg-slate-50/70 hover:bg-white"
+                            }`}
+
+                          >
+
+                            <div className="min-w-0">
+
+                              <p className="truncate text-base font-semibold text-slate-950">
+
+                                {tablet.display_name}
+
+                              </p>
+
+                              <p className="mt-1 text-sm text-slate-500">
+
+                                {tablet.tablet_code}
+
+                              </p>
+
+                            </div>
+
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white shadow-sm transition duration-200">
+
+                              <input
+
+                                type="checkbox"
+
+                                checked={selectedTransactions.includes(
+
+                                  tablet.transactionId
+
+                                )}
+
+                                onChange={() =>
+
+                                  toggleTransaction(
+
+                                    tablet.transactionId
+
+                                  )
+
+                                }
+
+                                className="h-4 w-4 accent-indigo-600"
+
+                              />
+
+                            </span>
+
+                          </label>
+
+                        )
+
+                      )
+
+                    }
+
+                  </div>
+
+                )
+
+              }
+
+            </section>
+
+            <button
+
+              onClick={handleReturn}
+
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-rose-600 px-6 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200"
+
+            >
+
+              Return Selected Tablets
+
+            </button>
+
+          </div>
 
         </div>
-
-        <button
-
-          onClick={handleReturn}
-
-          className="w-full mt-8 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg"
-
-        >
-
-          Return Selected Tablets
-
-        </button>
 
       </div>
 
@@ -354,13 +464,15 @@ toast.success(`${tablet.display_name} selected`);
   open={showEmployeeScanner}
   onClose={() => setShowEmployeeScanner(false)}
   onScan={handleEmployeeQR}
-/>
+/
+>
 
 <QRScannerModal
   open={showTabletScanner}
   onClose={() => setShowTabletScanner(false)}
   onScan={handleTabletQR}
-/>
+/
+>
 
     </div>
 

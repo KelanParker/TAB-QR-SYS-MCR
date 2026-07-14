@@ -6,11 +6,11 @@ function QRScannerModal({ open, onClose, onScan }) {
 
     return (
 
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
 
-            <div className="bg-white rounded-xl shadow-xl p-5 w-[95%] max-w-md">
+                <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl sm:p-6">
 
-                <h2 className="text-2xl font-bold mb-4 text-center">
+                    <h2 className="mb-4 text-center text-2xl font-semibold tracking-tight text-slate-950">
 
                     Scan QR Code
 
@@ -38,7 +38,7 @@ function QRScannerModal({ open, onClose, onScan }) {
 
                 <button
                     onClick={onClose}
-                    className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg"
+                    className="mt-4 w-full rounded-xl bg-rose-600 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md"
                 >
 
                     Cancel

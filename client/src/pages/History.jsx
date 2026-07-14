@@ -79,169 +79,273 @@ function History() {
 
     return (
 
-        <div className="min-h-screen bg-gray-100 py-10">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 text-slate-900">
 
-            <div className="max-w-6xl mx-auto">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
 
-                <h1 className="text-4xl font-bold mb-6">
+                <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur">
 
-                    Transaction History
+                    <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-6 sm:px-8 sm:py-8">
 
-                </h1>
+                        <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 shadow-sm">
 
-                <input
+                            Activity log
 
-                    className="w-full mb-6 border rounded-lg p-3"
+                        </span>
 
-                    placeholder="Search employee, tablet code or tablet name..."
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
-                    value={search}
+                            <div>
 
-                    onChange={(e) => setSearch(e.target.value)}
+                                <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
 
-                />
+                                    Transaction History
 
-                {loading && (
+                                </h1>
 
-                    <div className="bg-white rounded-xl shadow p-6">
+                                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
 
-                        Loading history...
+                                    Review issue and return activity with employee, tablet, and timestamp details.
 
-                    </div>
-
-                )}
-
-                {!loading && error && (
-
-                    <div className="bg-red-100 text-red-700 rounded-xl p-6">
-
-                        {error}
-
-                    </div>
-
-                )}
-
-                {!loading && !error && filteredHistory.length === 0 && (
-
-                    <div className="bg-white rounded-xl shadow p-6">
-
-                        No matching transactions found.
-
-                    </div>
-
-                )}
-
-                <div className="space-y-5">
-
-                    {filteredHistory.map((item) => (
-
-                        <div
-
-                            key={item.id}
-
-                            className="bg-white rounded-xl shadow-md p-6 border border-gray-200"
-
-                        >
-
-                            <div className="flex justify-between items-center mb-4">
-
-                                <div>
-
-                                    <h2 className="text-xl font-bold">
-
-                                        {item.display_name}
-
-                                    </h2>
-
-                                    <p className="text-gray-500">
-
-                                        {item.tablet_code}
-
-                                    </p>
-
-                                </div>
-
-                                {item.return_time ? (
-
-                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full font-semibold">
-
-                                        RETURNED
-
-                                    </span>
-
-                                ) : (
-
-                                    <span className="bg-green-100 text-green-700 px-4 py-1 rounded-full font-semibold">
-
-                                        ISSUED
-
-                                    </span>
-
-                                )}
+                                </p>
 
                             </div>
 
-                            <div className="grid md:grid-cols-3 gap-6">
+                            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
-                                <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
 
-                                    <p className="text-gray-500 text-sm">
+                                    Matching records
 
-                                        Employee
+                                </p>
 
-                                    </p>
+                                <p className="mt-1 text-lg font-semibold text-slate-950">
 
-                                    <p className="font-semibold">
+                                    {filteredHistory.length}
 
-                                        {item.employee_name}
-
-                                    </p>
-
-                                    <p className="text-gray-500">
-
-                                        {item.employee_no}
-
-                                    </p>
-
-                                </div>
-
-                                <div>
-
-                                    <p className="text-gray-500 text-sm">
-
-                                        Borrowed
-
-                                    </p>
-
-                                    <p>
-
-                                        {formatDate(item.borrow_time)}
-
-                                    </p>
-
-                                </div>
-
-                                <div>
-
-                                    <p className="text-gray-500 text-sm">
-
-                                        Returned
-
-                                    </p>
-
-                                    <p>
-
-                                        {formatDate(item.return_time)}
-
-                                    </p>
-
-                                </div>
+                                </p>
 
                             </div>
 
                         </div>
 
-                    ))}
+                    </div>
+
+                    <div className="space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm">
+
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+
+                                Search history
+
+                            </label>
+
+                            <input
+
+                                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+
+                                placeholder="Search employee, tablet code or tablet name..."
+
+                                value={search}
+
+                                onChange={(e) => setSearch(e.target.value)}
+
+                            />
+
+                        </div>
+
+                        {loading && (
+
+                            <div className="rounded-2xl border border-slate-200 bg-white px-5 py-10 text-center shadow-sm">
+
+                                <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
+
+                                <p className="text-base font-medium text-slate-900">
+
+                                    Loading history...
+
+                                </p>
+
+                                <p className="mt-1 text-sm text-slate-500">
+
+                                    Refreshing transaction records.
+
+                                </p>
+
+                            </div>
+
+                        )}
+
+                        {!loading && error && (
+
+                            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-700 shadow-sm">
+
+                                <p className="font-semibold">
+
+                                    Unable to load history
+
+                                </p>
+
+                                <p className="mt-1 text-sm">
+
+                                    {error}
+
+                                </p>
+
+                            </div>
+
+                        )}
+
+                        {!loading && !error && filteredHistory.length === 0 && (
+
+                            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center shadow-sm">
+
+                                <p className="text-base font-medium text-slate-900">
+
+                                    No matching transactions found.
+
+                                </p>
+
+                                <p className="mt-2 text-sm text-slate-500">
+
+                                    Try a different employee name, employee code, tablet code, or tablet name.
+
+                                </p>
+
+                            </div>
+
+                        )}
+
+                        {!loading && !error && filteredHistory.length > 0 && (
+
+                            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+                                <table className="min-w-full divide-y divide-slate-200">
+
+                                    <thead className="bg-slate-50">
+
+                                        <tr>
+
+                                            <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Tablet
+
+                                            </th>
+
+                                            <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Employee
+
+                                            </th>
+
+                                            <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Borrowed
+
+                                            </th>
+
+                                            <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Returned
+
+                                            </th>
+
+                                            <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Status
+
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody className="divide-y divide-slate-200 bg-white">
+
+                                        {filteredHistory.map((item) => (
+
+                                            <tr key={item.id} className="transition-colors duration-200 hover:bg-slate-50">
+
+                                                <td className="whitespace-nowrap px-5 py-5 align-top">
+
+                                                    <p className="text-base font-semibold text-slate-950">
+
+                                                        {item.display_name}
+
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm text-slate-500">
+
+                                                        {item.tablet_code}
+
+                                                    </p>
+
+                                                </td>
+
+                                                <td className="px-5 py-5 align-top">
+
+                                                    <p className="text-sm font-semibold text-slate-950">
+
+                                                        {item.employee_name}
+
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm text-slate-500">
+
+                                                        {item.employee_no}
+
+                                                    </p>
+
+                                                </td>
+
+                                                <td className="whitespace-nowrap px-5 py-5 align-top text-sm text-slate-700">
+
+                                                    {formatDate(item.borrow_time)}
+
+                                                </td>
+
+                                                <td className="whitespace-nowrap px-5 py-5 align-top text-sm text-slate-700">
+
+                                                    {formatDate(item.return_time)}
+
+                                                </td>
+
+                                                <td className="whitespace-nowrap px-5 py-5 align-top">
+
+                                                    {item.return_time ? (
+
+                                                        <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700 ring-1 ring-inset ring-blue-200">
+
+                                                            Returned
+
+                                                        </span>
+
+                                                    ) : (
+
+                                                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 ring-1 ring-inset ring-emerald-200">
+
+                                                            Issued
+
+                                                        </span>
+
+                                                    )}
+
+                                                </td>
+
+                                            </tr>
+
+                                        ))}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        )}
+
+                    </div>
 
                 </div>
 

@@ -27,17 +27,17 @@ function QRModal({
 
     return (
 
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
 
-            <div className="bg-white rounded-xl shadow-xl p-8 w-[90%] max-w-md">
+                <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
 
-                <h2 className="text-2xl font-bold text-center mb-6">
+                    <h2 className="mb-6 text-center text-2xl font-semibold tracking-tight text-slate-950">
 
                     {title}
 
                 </h2>
 
-                <div className="flex justify-center">
+                    <div className="flex justify-center rounded-2xl bg-slate-50 p-4">
 
                     <QRCodeCanvas
                         id="qrCanvas"
@@ -48,24 +48,24 @@ function QRModal({
 
                 </div>
 
-                <p className="text-center mt-4 font-semibold">
+                <p className="mt-4 text-center text-sm font-semibold text-slate-700">
 
                     {value}
 
                 </p>
 
-                <div className="flex gap-3 mt-8">
+                <div className="mt-8 flex gap-3">
 
                     <button
                         onClick={downloadQR}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg"
+                        className="flex-1 rounded-xl bg-slate-950 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md"
                     >
                         Download
                     </button>
 
                     <button
                         onClick={onClose}
-                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg"
+                        className="flex-1 rounded-xl border border-slate-300 bg-white py-3 text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
                     >
                         Close
                     </button>
