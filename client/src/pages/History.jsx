@@ -40,11 +40,20 @@ function History() {
 
     function formatDate(date) {
 
-        if (!date) return "-";
+    if (!date) return "-";
 
-        return new Date(date).toLocaleString();
+    return new Date(date + "Z").toLocaleString("en-LK", {
+        timeZone: "Asia/Colombo",
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
 
-    }
+}
 
     const filteredHistory = useMemo(() => {
 

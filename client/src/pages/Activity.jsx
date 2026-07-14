@@ -170,7 +170,16 @@ function Activity() {
 
                                         <td className="p-4">
 
-                                            {new Date(log.created_at).toLocaleString()}
+                                            {new Date(log.created_at + "Z").toLocaleString("en-LK", {
+    timeZone: "Asia/Colombo",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+})}
 
                                         </td>
 
