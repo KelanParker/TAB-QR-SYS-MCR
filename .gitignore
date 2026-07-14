@@ -1,0 +1,17 @@
+client/node_modules/
+server/node_modules/
+
+client/dist/
+
+.env
+
+*.log
+
+.vscode/
+
+.DS_Store
+
+Thumbs.db
+
+*.db-shm
+*.db-wal
