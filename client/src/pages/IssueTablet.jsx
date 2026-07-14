@@ -6,6 +6,7 @@ import {
   getTablet,
   issueTablets,
 } from "../services/api";
+import QRScannerModal from "../components/QRScannerModal";
 
 function IssueTablet() {
   const [employeeCode, setEmployeeCode] = useState("");
@@ -15,6 +16,9 @@ function IssueTablet() {
   const [selectedTablets, setSelectedTablets] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
+  const [employeeScannerOpen, setEmployeeScannerOpen] = useState(false);
+  const [tabletScannerOpen, setTabletScannerOpen] = useState(false);
 
   const employeeInputRef = useRef(null);
   const tabletInputRef = useRef(null);
@@ -43,14 +47,16 @@ function IssueTablet() {
     }
   }
 
-  async function handleAddTablet() {
+  async function handleAddTablet(scannedCode = null) {
+
+    const code = scannedCode || tabletCode;
 
     if (!employee) {
       toast.error("Select an employee first.");
       return;
     }
 
-    if (tabletCode.length < 6) return;
+    if (code.length < 6) return;
 
     if (selectedTablets.length >= 7) {
       toast.error("Maximum tablets selected.");
@@ -59,7 +65,7 @@ function IssueTablet() {
 
     try {
 
-      const result = await getTablet(tabletCode);
+      const result = await getTablet(code);
 
       if (!result.success) {
         toast.error("Tablet not found.");
@@ -251,30 +257,42 @@ function IssueTablet() {
 
           </label>
 
-          <input
-            ref={employeeInputRef}
-            className="w-full border rounded-lg p-3"
-            placeholder="EMP001"
-            value={employeeCode}
-            onChange={(e) => {
+          <div className="flex gap-3">
 
-              const code = e.target.value.toUpperCase();
+    <input
+        ref={employeeInputRef}
+        className="flex-1 border rounded-lg p-3"
+        placeholder="EMP001"
+        value={employeeCode}
+        onChange={(e) => {
 
-              setEmployeeCode(code);
+            const code = e.target.value.toUpperCase();
 
-              handleEmployeeLookup(code);
+            setEmployeeCode(code);
 
-            }}
-            onKeyDown={(e) => {
+            handleEmployeeLookup(code);
 
-              if (e.key === "Enter") {
+        }}
+        onKeyDown={(e) => {
+
+            if (e.key === "Enter") {
 
                 handleEmployeeLookup(employeeCode);
 
-              }
+            }
 
-            }}
-          />
+        }}
+    />
+
+    <button
+        type="button"
+        onClick={() => setEmployeeScannerOpen(true)}
+        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-lg whitespace-nowrap"
+    >
+        Scan QR
+    </button>
+
+</div>
 
           {employee && (
 
@@ -335,12 +353,22 @@ function IssueTablet() {
               }}
             />
 
-            <button
-              onClick={handleAddTablet}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg"
-            >
-              Add
-            </button>
+            <>
+  <button
+    type="button"
+    onClick={() => setTabletScannerOpen(true)}
+    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-lg whitespace-nowrap"
+  >
+    Scan QR
+  </button>
+
+  <button
+    onClick={handleAddTablet}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg"
+  >
+    Add
+  </button>
+</>
 
           </div>
 
@@ -423,6 +451,31 @@ function IssueTablet() {
           {loading ? "Issuing..." : "Issue Tablets"}
 
         </button>
+
+        <QRScannerModal
+    open={employeeScannerOpen}
+    onClose={() => setEmployeeScannerOpen(false)}
+    onScan={(value) => {
+
+        const code = value.toUpperCase();
+
+        setEmployeeCode(code);
+
+        handleEmployeeLookup(code);
+
+    }}
+/>
+
+<QRScannerModal
+  open={tabletScannerOpen}
+  onClose={() => setTabletScannerOpen(false)}
+  onScan={(value) => {
+    const code = value.trim().toUpperCase();
+
+    setTabletCode(code);
+    handleAddTablet(code);
+  }}
+/>
 
       </div>
 
