@@ -87,29 +87,10 @@ db.prepare(`
     // =========================
     // Seed Employees
     // =========================
-    const employeeCount = db
-        .prepare("SELECT COUNT(*) AS count FROM employees")
-        .get();
+    // No default employees.
+    // Employees are added through the Admin panel.
 
-    if (employeeCount.count === 0) {
-
-        const insertEmployee = db.prepare(`
-            INSERT INTO employees (employee_no, name)
-            VALUES (?, ?)
-        `);
-
-        const employees = [
-            ["EMP001", "Kasun Perera"],
-            ["EMP002", "Nimal Silva"],
-            ["EMP003", "Ashan Fernando"]
-        ];
-
-        for (const employee of employees) {
-            insertEmployee.run(...employee);
-        }
-
-        console.log("✅ Default employees added");
-    }
+    
 
     console.log("✅ Database Initialized");
 }
