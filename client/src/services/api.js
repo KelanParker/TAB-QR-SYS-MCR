@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://tab-qr-backend.onrender.com/api";
 
 /*
 ==================================
@@ -171,7 +171,7 @@ export async function getDashboard() {
 export async function getDashboardStats() {
 
     const response = await fetch(
-        "http://localhost:5000/api/dashboard/stats"
+        `${API_BASE_URL}/dashboard/stats`
     );
 
     return response.json();
