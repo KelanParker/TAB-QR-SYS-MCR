@@ -6,21 +6,26 @@ const db = require("./database/db");
 const initializeDatabase = require("./database/init");
 const tabletRoutes = require("./routes/tabletRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const tabletLookupRoutes = require("./routes/tabletLookupRoutes");  
 const transactionRoutes = require("./routes/transactionRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const activityRoutes = require("./routes/activityRoutes");
+const { startBackupService } = require("./services/backupService");
 
 const app = express();
 
 initializeDatabase();
+
+startBackupService();
 
 app.use(cors());
 app.use(express.json());
 
 app.use("/api/tablets", tabletRoutes);
 app.use("/api/employees", employeeRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/tablets/lookup", tabletLookupRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/dashboard", dashboardRoutes);

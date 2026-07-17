@@ -40,4 +40,62 @@ router.get("/", (req, res) => {
 
 });
 
+/*
+=====================================
+DELETE SINGLE HISTORY RECORD
+DELETE /api/history/:id
+=====================================
+*/
+
+router.delete("/:id", (req, res) => {
+
+    const id = req.params.id;
+
+    const transaction = db.prepare(`
+        SELECT id
+        FROM transactions
+        WHERE id = ?
+    `).get(id);
+
+    if (!transaction) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Record not found."
+        });
+
+    }
+
+    db.prepare(`
+        DELETE FROM transactions
+        WHERE id = ?
+    `).run(id);
+
+    res.json({
+        success: true,
+        message: "Record deleted successfully."
+    });
+
+});
+
+/*
+=====================================
+CLEAR ALL HISTORY
+DELETE /api/history
+=====================================
+*/
+
+router.delete("/", (req, res) => {
+
+    db.prepare(`
+        DELETE FROM transactions
+    `).run();
+
+    res.json({
+        success: true,
+        message: "History cleared successfully."
+    });
+
+});
+
 module.exports = router;

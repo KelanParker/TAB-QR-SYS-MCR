@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const db = require("../database/db");
 const logActivity = require("../utils/activityLogger");
+const jwt = require("jsonwebtoken");
+
+const EMPLOYEE_QR_SECRET = process.env.EMPLOYEE_QR_SECRET || process.env.JWT_SECRET;
 
 /*
 =====================================
@@ -21,6 +24,121 @@ router.get("/", (req, res) => {
     res.json({
         success: true,
         employees
+    });
+
+});
+
+
+/*
+=====================================
+GENERATE EMPLOYEE QR TOKEN
+GET /api/employees/:employeeNo/qr-token
+=====================================
+*/
+
+router.get("/:employeeNo/qr-token", (req, res) => {
+
+    if (!EMPLOYEE_QR_SECRET) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Employee QR secret is not configured."
+        });
+
+    }
+
+    const employee = db.prepare(`
+        SELECT employee_no
+        FROM employees
+        WHERE employee_no = ?
+    `).get(req.params.employeeNo);
+
+    if (!employee) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Employee not found."
+        });
+
+    }
+
+    const token = jwt.sign(
+        {
+            employee_no: employee.employee_no
+        },
+        EMPLOYEE_QR_SECRET
+    );
+
+    res.json({
+        success: true,
+        token
+    });
+
+});
+
+
+/*
+=====================================
+VERIFY EMPLOYEE QR TOKEN
+POST /api/employees/verify-qr
+=====================================
+*/
+
+router.post("/verify-qr", (req, res) => {
+
+    if (!EMPLOYEE_QR_SECRET) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Employee QR secret is not configured."
+        });
+
+    }
+
+    const { token } = req.body;
+
+    if (!token) {
+
+        return res.status(400).json({
+            success: false,
+            message: "Employee QR token is required."
+        });
+
+    }
+
+    let payload;
+
+    try {
+
+        payload = jwt.verify(token, EMPLOYEE_QR_SECRET);
+
+    } catch {
+
+        return res.status(401).json({
+            success: false,
+            message: "Invalid employee QR token."
+        });
+
+    }
+
+    const employee = db.prepare(`
+        SELECT *
+        FROM employees
+        WHERE employee_no = ?
+    `).get(payload.employee_no);
+
+    if (!employee) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Employee not found."
+        });
+
+    }
+
+    res.json({
+        success: true,
+        employee
     });
 
 });

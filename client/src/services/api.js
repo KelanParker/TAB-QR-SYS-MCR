@@ -8,9 +8,9 @@ EMPLOYEE
 
 export async function getEmployee(employeeCode) {
 
-    const response = await fetch(
-        `${API_BASE_URL}/employees/${employeeCode}`
-    );
+    const requestUrl = `${API_BASE_URL}/employees/${employeeCode}`;
+
+    const response = await fetch(requestUrl);
 
     return response.json();
 
@@ -144,6 +144,24 @@ export async function returnTablets(transactionIds) {
 
 /*
 ==================================
+GET ISSUED TABLET
+==================================
+*/
+
+export async function getIssuedTablet(tabletCode) {
+
+    const response = await fetch(
+
+        `${API_BASE_URL}/transactions/tablet/${tabletCode}`
+
+    );
+
+    return response.json();
+
+}
+
+/*
+==================================
 DASHBOARD
 ==================================
 */
@@ -200,6 +218,32 @@ export async function getHistory() {
 
 }
 
+export async function deleteHistoryRecord(id) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/history/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    return response.json();
+
+}
+
+export async function clearHistory() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/history`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    return response.json();
+
+}
+
 /*
 ==================================
 ADMIN - EMPLOYEES
@@ -208,9 +252,9 @@ ADMIN - EMPLOYEES
 
 export async function getEmployees() {
 
-    const response = await fetch(
-        `${API_BASE_URL}/employees`
-    );
+    const requestUrl = `${API_BASE_URL}/employees`;
+
+    const response = await fetch(requestUrl);
 
     return response.json();
 
@@ -218,9 +262,11 @@ export async function getEmployees() {
 
 export async function addEmployee(employee_no, name) {
 
+    const requestUrl = `${API_BASE_URL}/employees`;
+
     const response = await fetch(
 
-        `${API_BASE_URL}/employees`,
+        requestUrl,
 
         {
 
@@ -249,9 +295,11 @@ export async function addEmployee(employee_no, name) {
 
 export async function deleteEmployee(id) {
 
+    const requestUrl = `${API_BASE_URL}/employees/${id}`;
+
     const response = await fetch(
 
-        `${API_BASE_URL}/employees/${id}`,
+        requestUrl,
 
         {
 
@@ -331,6 +379,74 @@ export async function deleteTablet(id) {
 
 }
 
+export async function verifyAdminPassword(password) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/admin/verify`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                password
+            })
+        }
+    );
+
+    return response.json();
+
+}
+
+/*
+==================================
+ADMIN - EXPORT BACKUP
+==================================
+*/
+
+export async function exportBackup() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/admin/export`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(data.message);
+
+    }
+
+    return data;
+
+}
+
+export async function importBackup(backupData) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/admin/import`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(backupData)
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(data.message);
+
+    }
+
+    return data;
+
+}
+
 /*
 ==================================
 ACTIVITY LOGS
@@ -344,5 +460,72 @@ export async function getActivityLogs() {
     );
 
     return response.json();
+
+}
+
+export async function deleteActivityLog(id) {
+
+    const response = await fetch(
+        `${API_BASE_URL}/activity/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    return response.json();
+
+}
+
+export async function clearActivityLogs() {
+
+    const response = await fetch(
+        `${API_BASE_URL}/activity`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    return response.json();
+
+}
+
+export async function getEmployeeQrToken(employeeNo) {
+
+    const requestUrl = `${API_BASE_URL}/employees/${employeeNo}/qr-token`;
+
+    const response = await fetch(requestUrl);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message);
+    }
+
+    return data;
+
+}
+
+export async function verifyEmployeeQrToken(token) {
+
+    const requestUrl = `${API_BASE_URL}/employees/verify-qr`;
+
+    const response = await fetch(
+        requestUrl,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ token })
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message);
+    }
+
+    return data;
 
 }

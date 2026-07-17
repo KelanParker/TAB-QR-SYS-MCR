@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { getHistory } from "../services/api";
+import toast from "react-hot-toast";
+import {
+    getHistory,
+    deleteHistoryRecord,
+    clearHistory,
+    verifyAdminPassword,
+} from "../services/api";
 
 function History() {
 
@@ -8,27 +14,34 @@ function History() {
     const [error, setError] = useState("");
     const [search, setSearch] = useState("");
 
-    useEffect(() => {
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState(null);
 
-        async function loadHistory() {
+    const [adminAuthOpen, setAdminAuthOpen] = useState(false);
+    const [adminPassword, setAdminPassword] = useState("");
+    const [adminAuthLoading, setAdminAuthLoading] = useState(false);
 
-            try {
+    async function loadHistory() {
 
-                const result = await getHistory();
+        try {
 
-                setHistory(result.history);
+            const result = await getHistory();
 
-            } catch (err) {
+            setHistory(result.history);
 
-                setError(err.message || "Failed to load history.");
+        } catch (err) {
 
-            } finally {
+            setError(err.message || "Failed to load history.");
 
-                setLoading(false);
+        } finally {
 
-            }
+            setLoading(false);
 
         }
+
+    }
+
+    useEffect(() => {
 
         loadHistory();
 
@@ -77,6 +90,114 @@ function History() {
 
     }, [history, search]);
 
+    function requestDelete(action) {
+        setPendingAction(() => action);
+        setConfirmOpen(true);
+    }
+
+    function cancelConfirm() {
+        setConfirmOpen(false);
+        setPendingAction(null);
+    }
+
+    function proceedToAuth() {
+        setConfirmOpen(false);
+        setAdminPassword("");
+        setAdminAuthOpen(true);
+    }
+
+    function closeAdminAuth() {
+        if (adminAuthLoading) return;
+
+        setAdminAuthOpen(false);
+        setAdminPassword("");
+        setPendingAction(null);
+    }
+
+    async function unlockAndDelete(event) {
+        event.preventDefault();
+
+        if (!adminPassword) {
+            toast.error("Enter the admin password.");
+            return;
+        }
+
+        const action = pendingAction;
+
+        setAdminAuthLoading(true);
+
+        try {
+
+            const result = await verifyAdminPassword(adminPassword);
+
+            if (!result.success) {
+                toast.error(result.message || "Invalid admin password.");
+                return;
+            }
+
+            setAdminAuthOpen(false);
+            setAdminPassword("");
+            setPendingAction(null);
+
+            if (action) {
+                await action();
+            }
+
+        } catch (err) {
+            toast.error("Failed to verify admin password.");
+        } finally {
+            setAdminAuthLoading(false);
+        }
+    }
+
+    async function deleteRecord(id) {
+
+        try {
+
+            const result = await deleteHistoryRecord(id);
+
+            if (!result.success) {
+                toast.error(result.message || "Failed to delete record.");
+                return;
+            }
+
+            toast.success(result.message || "Record deleted successfully.");
+            loadHistory();
+
+        } catch (err) {
+            toast.error("Failed to delete record.");
+        }
+
+    }
+
+    function handleDeleteRecord(id) {
+        requestDelete(() => deleteRecord(id));
+    }
+
+    async function clearAllHistory() {
+
+        try {
+
+            const result = await clearHistory();
+
+            if (!result.success) {
+                toast.error(result.message || "Failed to clear history.");
+                return;
+            }
+
+            toast.success(result.message || "History cleared successfully.");
+            loadHistory();
+
+        } catch (err) {
+            toast.error("Failed to clear history.");
+        }
+
+    }
+
+    function handleClearAllHistory() {
+        requestDelete(() => clearAllHistory());
+    }
+
     return (
 
         <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 text-slate-900">
@@ -111,19 +232,31 @@ function History() {
 
                             </div>
 
-                            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                            <div className="flex flex-wrap items-center gap-3">
 
-                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                <button
+                                    type="button"
+                                    onClick={handleClearAllHistory}
+                                    className="inline-flex h-12 items-center justify-center rounded-xl border border-rose-200 bg-white px-5 text-sm font-semibold text-rose-600 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-100"
+                                >
+                                    Clear All History
+                                </button>
 
-                                    Matching records
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
-                                </p>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
 
-                                <p className="mt-1 text-lg font-semibold text-slate-950">
+                                        Matching records
 
-                                    {filteredHistory.length}
+                                    </p>
 
-                                </p>
+                                    <p className="mt-1 text-lg font-semibold text-slate-950">
+
+                                        {filteredHistory.length}
+
+                                    </p>
+
+                                </div>
 
                             </div>
 
@@ -257,6 +390,12 @@ function History() {
 
                                             </th>
 
+                                            <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+
+                                                Action
+
+                                            </th>
+
                                         </tr>
 
                                     </thead>
@@ -333,6 +472,18 @@ function History() {
 
                                                 </td>
 
+                                                <td className="whitespace-nowrap px-5 py-5 align-top text-center">
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteRecord(item.id)}
+                                                        className="inline-flex items-center justify-center rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-100"
+                                                    >
+                                                        Delete
+                                                    </button>
+
+                                                </td>
+
                                             </tr>
 
                                         ))}
@@ -350,6 +501,82 @@ function History() {
                 </div>
 
             </div>
+
+            {confirmOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
+                        <h2 className="mb-2 text-center text-2xl font-semibold tracking-tight text-slate-950">
+                            Confirm Deletion
+                        </h2>
+
+                        <p className="mb-6 text-center text-sm text-slate-500">
+                            This action cannot be undone.
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={cancelConfirm}
+                                className="flex-1 rounded-xl border border-slate-300 bg-white py-3 text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={proceedToAuth}
+                                className="flex-1 rounded-xl bg-rose-600 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {adminAuthOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+                    <form
+                        onSubmit={unlockAndDelete}
+                        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8"
+                    >
+                        <h2 className="mb-2 text-center text-2xl font-semibold tracking-tight text-slate-950">
+                            Admin Authentication
+                        </h2>
+
+                        <p className="mb-6 text-center text-sm text-slate-500">
+                            Enter the admin password to continue.
+                        </p>
+
+                        <input
+                            type="password"
+                            value={adminPassword}
+                            onChange={(e) => setAdminPassword(e.target.value)}
+                            autoFocus
+                            className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                            placeholder="Password"
+                        />
+
+                        <div className="mt-8 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={closeAdminAuth}
+                                className="flex-1 rounded-xl border border-slate-300 bg-white py-3 text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={adminAuthLoading}
+                                className="flex-1 rounded-xl bg-slate-950 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+                            >
+                                {adminAuthLoading ? "Unlocking..." : "Unlock"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
         </div>
 

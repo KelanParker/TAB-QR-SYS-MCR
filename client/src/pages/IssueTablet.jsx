@@ -2,15 +2,15 @@ import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import { useState, useRef } from "react";
 import {
-  getEmployee,
   getTablet,
   issueTablets,
+  verifyEmployeeQrToken,
 } from "../services/api";
 import QRScannerModal from "../components/QRScannerModal";
 
 function IssueTablet() {
-  const [employeeCode, setEmployeeCode] = useState("");
   const [employee, setEmployee] = useState(null);
+  const [verifyingEmployee, setVerifyingEmployee] = useState(false);
 
   const [tabletCode, setTabletCode] = useState("");
   const [selectedTablets, setSelectedTablets] = useState([]);
@@ -20,36 +20,48 @@ function IssueTablet() {
   const [employeeScannerOpen, setEmployeeScannerOpen] = useState(false);
   const [tabletScannerOpen, setTabletScannerOpen] = useState(false);
 
-  const employeeInputRef = useRef(null);
   const tabletInputRef = useRef(null);
 
-  async function handleEmployeeLookup(code) {
-    if (code.length < 6) {
-      setEmployee(null);
+  async function handleEmployeeQrScan(token) {
+    const trimmedToken = token.trim();
+
+    if (!trimmedToken) {
       return;
     }
 
+    setVerifyingEmployee(true);
+
     try {
-      const result = await getEmployee(code);
+      const result = await verifyEmployeeQrToken(trimmedToken);
 
-      if (result.success) {
-        setEmployee(result.employee);
+      setEmployee(result.employee);
 
-        setTimeout(() => {
-          tabletInputRef.current?.focus();
-        }, 100);
-      } else {
-        setEmployee(null);
-      }
+      toast.success("Employee verified.");
+
+      setTimeout(() => {
+        tabletInputRef.current?.focus();
+      }, 100);
     } catch {
       setEmployee(null);
+      toast.error("Invalid employee QR.");
+    } finally {
+      setVerifyingEmployee(false);
+      setEmployeeScannerOpen(false);
     }
+  }
+
+  function clearEmployee() {
+    setEmployee(null);
+    setSelectedTablets([]);
+    setTabletCode("");
+
+    toast.success("Employee cleared.");
   }
 
   async function handleAddTablet(scannedCode = null) {
     const code = scannedCode || tabletCode;
 
-    if (!employee) {
+    if (!employee || verifyingEmployee) {
       toast.error("Select an employee first.");
       return;
     }
@@ -159,10 +171,9 @@ function IssueTablet() {
       );
 
       setEmployee(null);
-      setEmployeeCode("");
       setSelectedTablets([]);
       setTabletCode("");
-      employeeInputRef.current?.focus();
+      tabletInputRef.current?.focus();
     }
     catch (error) {
       toast.error(
@@ -188,7 +199,7 @@ function IssueTablet() {
                   Issue Tablets
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                  Enter an employee code, scan QR codes, and build a tablet set before issuing.
+                  Scan an employee QR, verify identity, then scan tablets before issuing.
                 </p>
               </div>
 
@@ -211,35 +222,28 @@ function IssueTablet() {
                     Employee
                   </h2>
                   <p className="text-sm text-slate-500">
-                    Lookup by employee code or scan a QR code.
+                    Scan a signed employee QR token to verify identity.
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                <input
-                  ref={employeeInputRef}
-                  className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-                  placeholder="EMP001"
-                  value={employeeCode}
-                  onChange={(e) => {
-                    const code = e.target.value.toUpperCase();
-                    setEmployeeCode(code);
-                    handleEmployeeLookup(code);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleEmployeeLookup(employeeCode);
-                    }
-                  }}
-                />
-
                 <button
                   type="button"
                   onClick={() => setEmployeeScannerOpen(true)}
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
+                  disabled={verifyingEmployee}
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-400"
                 >
-                  Scan QR
+                  {verifyingEmployee ? "Verifying..." : "Scan Employee QR"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={clearEmployee}
+                  disabled={!employee || verifyingEmployee}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                >
+                  Clear Employee
                 </button>
               </div>
 
@@ -249,7 +253,7 @@ function IssueTablet() {
                     Employee found
                   </p>
                   <p className="mt-2 text-base font-semibold text-emerald-950">
-                    ✅ {employee.name}
+                    {employee.name}
                   </p>
                   <p className="mt-1 text-sm text-emerald-700">
                     {employee.employee_no}
@@ -257,7 +261,7 @@ function IssueTablet() {
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-4 text-sm text-slate-500">
-                  Search for an employee to begin issuing tablets.
+                  Scan an employee QR to begin issuing tablets.
                 </div>
               )}
             </section>
@@ -269,7 +273,7 @@ function IssueTablet() {
                     Tablet
                   </h2>
                   <p className="text-sm text-slate-500">
-                    Add tablets manually or scan QR codes.
+                    Add tablets manually or scan QR codes after employee verification.
                   </p>
                 </div>
               </div>
@@ -277,7 +281,8 @@ function IssueTablet() {
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
                 <input
                   ref={tabletInputRef}
-                  className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                    disabled={!employee}
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                   placeholder="TAB001"
                   value={tabletCode}
                   onChange={(e) =>
@@ -295,7 +300,8 @@ function IssueTablet() {
                 <button
                   type="button"
                   onClick={() => setTabletScannerOpen(true)}
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
+                  disabled={!employee}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                 >
                   Scan QR
                 </button>
@@ -303,7 +309,8 @@ function IssueTablet() {
                 <button
                   type="button"
                   onClick={handleAddTablet}
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-indigo-600 px-6 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                  disabled={!employee}
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-indigo-600 px-6 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-slate-400"
                 >
                   Add
                 </button>
@@ -366,12 +373,12 @@ function IssueTablet() {
 
             <button
               onClick={handleIssue}
-              disabled={loading || selectedTablets.length === 0}
+              disabled={loading || selectedTablets.length === 0 || !employee}
               className={`inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-sm font-semibold text-white shadow-sm transition duration-200 focus:outline-none focus:ring-4 focus:ring-emerald-200 ${
                 loading
                   ? "cursor-not-allowed bg-slate-400"
                   : "bg-emerald-600 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md"
-              } ${selectedTablets.length === 0 && !loading ? "opacity-70" : ""}`}
+              } ${(selectedTablets.length === 0 || !employee) && !loading ? "opacity-70" : ""}`}
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -389,9 +396,7 @@ function IssueTablet() {
           open={employeeScannerOpen}
           onClose={() => setEmployeeScannerOpen(false)}
           onScan={(value) => {
-            const code = value.toUpperCase();
-            setEmployeeCode(code);
-            handleEmployeeLookup(code);
+            handleEmployeeQrScan(value);
           }}
         />
 

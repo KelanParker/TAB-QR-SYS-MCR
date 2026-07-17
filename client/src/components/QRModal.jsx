@@ -48,12 +48,6 @@ function QRModal({
 
                 </div>
 
-                <p className="mt-4 text-center text-sm font-semibold text-slate-700">
-
-                    {value}
-
-                </p>
-
                 <div className="mt-8 flex gap-3">
 
                     <button

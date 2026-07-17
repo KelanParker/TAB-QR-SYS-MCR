@@ -1,0 +1,58 @@
+{
+  "employees": [
+    {
+      "id": 8,
+      "employee_no": "2688",
+      "name": "Mark Mariadas",
+      "created_at": "2026-07-17 04:08:35"
+    },
+    {
+      "id": 10,
+      "employee_no": "2779",
+      "name": "Kalana Punsara",
+      "created_at": "2026-07-17 04:08:35"
+    }
+  ],
+  "tablets": [
+    {
+      "id": 1,
+      "tablet_code": "TAB001",
+      "display_name": "Hiru FM - 1"
+    },
+    {
+      "id": 2,
+      "tablet_code": "TAB002",
+      "display_name": "Hiru FM - 2"
+    },
+    {
+      "id": 3,
+      "tablet_code": "TAB003",
+      "display_name": "Shaa FM - 1"
+    },
+    {
+      "id": 4,
+      "tablet_code": "TAB004",
+      "display_name": "Shaa FM - 2"
+    },
+    {
+      "id": 5,
+      "tablet_code": "TAB005",
+      "display_name": "Sooriyan FM - 1"
+    },
+    {
+      "id": 6,
+      "tablet_code": "TAB006",
+      "display_name": "Sooriyan FM - 2"
+    },
+    {
+      "id": 8,
+      "tablet_code": "TAB007",
+      "display_name": "GOLD "
+    }
+  ],
+  "transactions": [],
+  "activity_logs": [],
+  "history": [],
+  "version": "1.0",
+  "exportedAt": "2026-07-17T05:51:17.005Z"
+}

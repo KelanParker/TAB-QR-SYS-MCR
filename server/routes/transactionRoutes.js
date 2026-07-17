@@ -253,4 +253,73 @@ router.post("/return", (req, res) => {
 
 });
 
+
+/*
+=====================================
+GET ISSUED TABLET BY CODE
+GET /api/transactions/tablet/:tabletCode
+=====================================
+*/
+
+router.get("/tablet/:tabletCode", (req, res) => {
+
+    const tablet = db.prepare(`
+        SELECT *
+        FROM tablets
+        WHERE tablet_code = ?
+    `).get(req.params.tabletCode);
+
+    if (!tablet) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Tablet not found."
+        });
+
+    }
+
+    const transaction = db.prepare(`
+        SELECT
+            transactions.id AS transactionId,
+            tablets.tablet_code,
+            tablets.display_name,
+            employees.employee_no,
+            employees.name,
+            transactions.borrow_time
+        FROM transactions
+        JOIN tablets
+            ON tablets.id = transactions.tablet_id
+        JOIN employees
+            ON employees.id = transactions.employee_id
+        WHERE
+            transactions.tablet_id = ?
+        AND
+            transactions.return_time IS NULL
+    `).get(tablet.id);
+
+    if (!transaction) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Tablet is not currently issued."
+        });
+
+    }
+
+    res.json({
+        success: true,
+        transactionId: transaction.transactionId,
+        tablet: {
+            tablet_code: transaction.tablet_code,
+            display_name: transaction.display_name
+        },
+        employee: {
+            employee_no: transaction.employee_no,
+            name: transaction.name
+        },
+        borrow_time: transaction.borrow_time
+    });
+
+});
+
 module.exports = router;

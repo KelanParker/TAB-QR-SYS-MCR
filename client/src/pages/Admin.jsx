@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 import QRModal from "../components/QRModal";
 
 import {
   getEmployees,
+  getEmployeeQrToken,
   addEmployee,
   deleteEmployee,
   getTablets,
   addTablet,
   deleteTablet,
+  verifyAdminPassword,
+  exportBackup,
+  importBackup,
 } from "../services/api";
 
 function Admin() {
@@ -24,6 +27,15 @@ function Admin() {
   const [qrOpen, setQrOpen] = useState(false);
   const [qrTitle, setQrTitle] = useState("");
   const [qrValue, setQrValue] = useState("");
+
+  const [adminAuthOpen, setAdminAuthOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminAuthLoading, setAdminAuthLoading] = useState(false);
+  const [pendingAdminAction, setPendingAdminAction] = useState(null);
+
+  const importFileInputRef = useRef(null);
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false);
+  const [pendingImportData, setPendingImportData] = useState(null);
 
   async function loadEmployees() {
     const data = await getEmployees();
@@ -65,18 +77,55 @@ function Admin() {
     loadEmployees();
   }
 
-  async function handleDeleteEmployee(employee) {
-    const confirm = await Swal.fire({
-      title: "Delete Employee?",
-      text: employee.name,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      confirmButtonColor: "#dc2626",
-    });
+  function openAdminAuth(action) {
+    setPendingAdminAction(() => action);
+    setAdminPassword("");
+    setAdminAuthOpen(true);
+  }
 
-    if (!confirm.isConfirmed) return;
+  function closeAdminAuth() {
+    if (adminAuthLoading) return;
 
+    setAdminAuthOpen(false);
+    setAdminPassword("");
+    setPendingAdminAction(null);
+  }
+
+  async function unlockAdminAccess(event) {
+    event.preventDefault();
+
+    if (!adminPassword) {
+      toast.error("Enter the admin password.");
+      return;
+    }
+
+    const action = pendingAdminAction;
+
+    setAdminAuthLoading(true);
+
+    try {
+      const result = await verifyAdminPassword(adminPassword);
+
+      if (!result.success) {
+        toast.error(result.message || "Invalid admin password.");
+        return;
+      }
+
+      setAdminAuthOpen(false);
+      setAdminPassword("");
+      setPendingAdminAction(null);
+
+      if (action) {
+        await action();
+      }
+    } catch (error) {
+      toast.error("Failed to verify admin password.");
+    } finally {
+      setAdminAuthLoading(false);
+    }
+  }
+
+  async function deleteEmployeeRecord(employee) {
     const result = await deleteEmployee(employee.id);
 
     if (!result.success) {
@@ -88,13 +137,12 @@ function Admin() {
     loadEmployees();
   }
 
-  async function handleAddTablet() {
-    if (!tabletCode || !displayName) {
-      toast.error("Fill all fields.");
-      return;
-    }
+  function handleDeleteEmployee(employee) {
+    openAdminAuth(() => deleteEmployeeRecord(employee));
+  }
 
-    const result = await addTablet(tabletCode.toUpperCase(), displayName);
+  async function submitAddTablet(tabletCodeValue, displayNameValue) {
+    const result = await addTablet(tabletCodeValue, displayNameValue);
 
     if (!result.success) {
       toast.error(result.message);
@@ -107,18 +155,19 @@ function Admin() {
     loadTablets();
   }
 
-  async function handleDeleteTablet(tablet) {
-    const confirm = await Swal.fire({
-      title: "Delete Tablet?",
-      text: tablet.display_name,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-      confirmButtonColor: "#dc2626",
-    });
+  function handleAddTablet() {
+    if (!tabletCode || !displayName) {
+      toast.error("Fill all fields.");
+      return;
+    }
 
-    if (!confirm.isConfirmed) return;
+    const tabletCodeValue = tabletCode.toUpperCase();
+    const displayNameValue = displayName;
 
+    openAdminAuth(() => submitAddTablet(tabletCodeValue, displayNameValue));
+  }
+
+  async function deleteTabletRecord(tablet) {
     const result = await deleteTablet(tablet.id);
 
     if (!result.success) {
@@ -130,10 +179,118 @@ function Admin() {
     loadTablets();
   }
 
-  function openQR(title, value) {
-    setQrTitle(title);
-    setQrValue(value);
-    setQrOpen(true);
+  function handleDeleteTablet(tablet) {
+    openAdminAuth(() => deleteTabletRecord(tablet));
+  }
+
+  async function downloadBackup() {
+    try {
+      const data = await exportBackup();
+
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split("T")[0];
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mcr-backup-${date}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("Backup exported successfully.");
+    } catch (error) {
+      toast.error("Failed to export backup.");
+    }
+  }
+
+  function handleExportBackup() {
+    openAdminAuth(() => downloadBackup());
+  }
+
+  function handleImportBackupClick() {
+    importFileInputRef.current?.click();
+  }
+
+  async function handleImportFileSelected(event) {
+    const file = event.target.files?.[0];
+
+    // Reset so selecting the same file again still triggers onChange.
+    event.target.value = "";
+
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+
+      const hasEmployees = Array.isArray(parsed?.employees);
+      const hasTablets = Array.isArray(parsed?.tablets);
+      const hasTransactions = Array.isArray(parsed?.transactions);
+
+      if (!parsed || (!hasEmployees && !hasTablets && !hasTransactions)) {
+        toast.error("Invalid backup file.");
+        return;
+      }
+
+      setPendingImportData(parsed);
+      setImportConfirmOpen(true);
+    } catch (error) {
+      toast.error("Invalid backup file.");
+    }
+  }
+
+  function cancelImportConfirm() {
+    setImportConfirmOpen(false);
+    setPendingImportData(null);
+  }
+
+  function confirmImport() {
+    const data = pendingImportData;
+
+    setImportConfirmOpen(false);
+    setPendingImportData(null);
+
+    openAdminAuth(() => performImport(data));
+  }
+
+  async function performImport(data) {
+    try {
+      const result = await importBackup(data);
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to restore backup.");
+        return;
+      }
+
+      toast.success(result.message || "Backup restored successfully.");
+      loadEmployees();
+      loadTablets();
+    } catch (error) {
+      toast.error("Failed to restore backup.");
+    }
+  }
+
+  async function openQR(title, value) {
+    let qrValue = value;
+
+    try {
+      if (title === "Employee QR") {
+        const result = await getEmployeeQrToken(value);
+        qrValue = result.token;
+      }
+
+      setQrTitle(title);
+      setQrValue(qrValue);
+      setQrOpen(true);
+    } catch (error) {
+      toast.error("Failed to generate employee QR.");
+    }
   }
 
   return (
@@ -152,6 +309,32 @@ function Admin() {
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
                   Manage employees and tablets, generate QR codes, and keep inventory current.
                 </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleExportBackup}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
+                >
+                  Export Backup
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleImportBackupClick}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-200"
+                >
+                  Import Backup
+                </button>
+
+                <input
+                  ref={importFileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportFileSelected}
+                  className="hidden"
+                />
               </div>
             </div>
           </div>
@@ -228,9 +411,7 @@ function Admin() {
                         <td className="whitespace-nowrap px-5 py-5 text-center">
                           <button
                             type="button"
-                            onClick={() =>
-                              openQR("Employee QR", employee.employee_no)
-                            }
+                            onClick={() => openQR("Employee QR", employee.employee_no)}
                             className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-100"
                           >
                             QR
@@ -356,6 +537,82 @@ function Admin() {
         title={qrTitle}
         value={qrValue}
       />
+
+      {adminAuthOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <form
+            onSubmit={unlockAdminAccess}
+            className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8"
+          >
+            <h2 className="mb-2 text-center text-2xl font-semibold tracking-tight text-slate-950">
+              Admin Authentication
+            </h2>
+
+            <p className="mb-6 text-center text-sm text-slate-500">
+              Enter the admin password to continue.
+            </p>
+
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              autoFocus
+              className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+              placeholder="Password"
+            />
+
+            <div className="mt-8 flex gap-3">
+              <button
+                type="button"
+                onClick={closeAdminAuth}
+                className="flex-1 rounded-xl border border-slate-300 bg-white py-3 text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={adminAuthLoading}
+                className="flex-1 rounded-xl bg-slate-950 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {adminAuthLoading ? "Unlocking..." : "Unlock"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {importConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
+            <h2 className="mb-2 text-center text-2xl font-semibold tracking-tight text-slate-950">
+              Restore Backup
+            </h2>
+
+            <p className="mb-6 text-center text-sm text-slate-500">
+              This will overwrite the current database.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={cancelImportConfirm}
+                className="flex-1 rounded-xl border border-slate-300 bg-white py-3 text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmImport}
+                className="flex-1 rounded-xl bg-rose-600 py-3 text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
