@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { getIssuedTablet, returnTablets } from "../services/api";
 import QRScannerModal from "../components/QRScannerModal";
+import { formatTimestamp } from "../utils/dateTime";
 
 function ReturnTablet() {
   const [showTabletScanner, setShowTabletScanner] = useState(false);
@@ -187,7 +188,7 @@ function ReturnTablet() {
                         Borrow Time
                       </p>
                       <p className="mt-1 text-base font-semibold text-slate-950">
-                        {transaction.borrow_time}
+                        {formatTimestamp(transaction.borrow_time)}
                       </p>
                     </div>
                   </div>

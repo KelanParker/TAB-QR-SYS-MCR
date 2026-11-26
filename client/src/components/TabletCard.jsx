@@ -1,3 +1,5 @@
+import { formatTimestamp } from "../utils/dateTime";
+
 function TabletCard({ tablet }) {
 
   const isAvailable = tablet.status === "AVAILABLE";
@@ -64,7 +66,7 @@ function TabletCard({ tablet }) {
             </p>
 
             <p className="text-sm text-slate-500">
-              {new Date(tablet.borrow_time).toLocaleString()}
+              {formatTimestamp(tablet.borrow_time)}
             </p>
 
           </div>

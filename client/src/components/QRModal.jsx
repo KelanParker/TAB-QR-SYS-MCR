@@ -4,7 +4,8 @@ function QRModal({
     open,
     onClose,
     title,
-    value
+    value,
+    downloadName,
 }) {
 
     if (!open) return null;
@@ -17,7 +18,7 @@ function QRModal({
 
         const link = document.createElement("a");
 
-        link.download = `${value}.png`;
+        link.download = downloadName || `${value}.png`;
 
         link.href = url;
 

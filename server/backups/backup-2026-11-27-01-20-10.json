@@ -1,0 +1,177 @@
+{
+  "employees": [
+    {
+      "id": 8,
+      "employee_no": "2688",
+      "name": "Mark Mariadas",
+      "created_at": "2026-11-26 19:22:45"
+    },
+    {
+      "id": 12,
+      "employee_no": "2212",
+      "name": "Charuka Gamage",
+      "created_at": "2026-11-26 19:22:45"
+    },
+    {
+      "id": 13,
+      "employee_no": "2329",
+      "name": "Imeshi De Silva",
+      "created_at": "2026-11-26 19:22:45"
+    },
+    {
+      "id": 14,
+      "employee_no": "2779",
+      "name": "Kalana Punsara",
+      "created_at": "2026-11-26 19:22:45"
+    },
+    {
+      "id": 15,
+      "employee_no": "2409",
+      "name": "Sudari Shashikala",
+      "created_at": "2026-11-26 19:22:45"
+    }
+  ],
+  "tablets": [
+    {
+      "id": 1,
+      "tablet_code": "TAB001",
+      "display_name": "Hiru FM - 1"
+    },
+    {
+      "id": 2,
+      "tablet_code": "TAB002",
+      "display_name": "Hiru FM - 2"
+    },
+    {
+      "id": 3,
+      "tablet_code": "TAB003",
+      "display_name": "Shaa FM - 1"
+    },
+    {
+      "id": 4,
+      "tablet_code": "TAB004",
+      "display_name": "Shaa FM - 2"
+    },
+    {
+      "id": 5,
+      "tablet_code": "TAB005",
+      "display_name": "Sooriyan FM - 1"
+    },
+    {
+      "id": 6,
+      "tablet_code": "TAB006",
+      "display_name": "Sooriyan FM - 2"
+    },
+    {
+      "id": 8,
+      "tablet_code": "TAB007",
+      "display_name": "GOLD "
+    }
+  ],
+  "transactions": [
+    {
+      "id": 14,
+      "employee_id": 14,
+      "tablet_id": 1,
+      "borrow_time": "2026-07-17 06:23:26",
+      "return_time": "2026-07-17 06:23:53"
+    },
+    {
+      "id": 15,
+      "employee_id": 14,
+      "tablet_id": 1,
+      "borrow_time": "2026-11-26 19:22:02",
+      "return_time": "2026-11-26 19:23:10"
+    }
+  ],
+  "activity_logs": [
+    {
+      "id": 28,
+      "action": "DELETE_EMPLOYEE",
+      "details": "2779 - Kalana Punsara",
+      "created_at": "2026-07-17 06:00:50"
+    },
+    {
+      "id": 29,
+      "action": "ADD_EMPLOYEE",
+      "details": "CHARUKA GAMAGE - 2212",
+      "created_at": "2026-07-17 06:15:11"
+    },
+    {
+      "id": 30,
+      "action": "DELETE_EMPLOYEE",
+      "details": "CHARUKA GAMAGE - 2212",
+      "created_at": "2026-07-17 06:15:22"
+    },
+    {
+      "id": 31,
+      "action": "ADD_EMPLOYEE",
+      "details": "2212 - Charuka Gamage",
+      "created_at": "2026-07-17 06:15:45"
+    },
+    {
+      "id": 32,
+      "action": "ADD_EMPLOYEE",
+      "details": "2329 - Imeshi De Silva",
+      "created_at": "2026-07-17 06:19:29"
+    },
+    {
+      "id": 33,
+      "action": "ADD_EMPLOYEE",
+      "details": "2779 - Kalana Punsara",
+      "created_at": "2026-07-17 06:21:00"
+    },
+    {
+      "id": 34,
+      "action": "ADD_EMPLOYEE",
+      "details": "2409 - Sudari Shashikala",
+      "created_at": "2026-07-17 06:22:43"
+    },
+    {
+      "id": 35,
+      "action": "ISSUE",
+      "details": "Kalana Punsara issued Hiru FM - 1",
+      "created_at": "2026-07-17 06:23:26"
+    },
+    {
+      "id": 36,
+      "action": "RETURN",
+      "details": "Kalana Punsara returned Hiru FM - 1",
+      "created_at": "2026-07-17 06:23:53"
+    },
+    {
+      "id": 37,
+      "action": "ISSUE",
+      "details": "Kalana Punsara issued Hiru FM - 1",
+      "created_at": "2026-11-26 19:22:02"
+    },
+    {
+      "id": 38,
+      "action": "RETURN",
+      "details": "Kalana Punsara returned Hiru FM - 1",
+      "created_at": "2026-11-26 19:23:10"
+    }
+  ],
+  "history": [
+    {
+      "id": 15,
+      "employee_no": "2779",
+      "employee_name": "Kalana Punsara",
+      "tablet_code": "TAB001",
+      "display_name": "Hiru FM - 1",
+      "borrow_time": "2026-11-26 19:22:02",
+      "return_time": "2026-11-26 19:23:10"
+    },
+    {
+      "id": 14,
+      "employee_no": "2779",
+      "employee_name": "Kalana Punsara",
+      "tablet_code": "TAB001",
+      "display_name": "Hiru FM - 1",
+      "borrow_time": "2026-07-17 06:23:26",
+      "return_time": "2026-07-17 06:23:53"
+    }
+  ],
+  "version": "1.0",
+  "exportedAt": "2026-11-26T19:50:10.578Z"
+}

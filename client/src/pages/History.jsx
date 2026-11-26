@@ -6,6 +6,7 @@ import {
     clearHistory,
     verifyAdminPassword,
 } from "../services/api";
+import { formatTimestamp } from "../utils/dateTime";
 
 function History() {
 
@@ -50,23 +51,6 @@ function History() {
         return () => clearInterval(interval);
 
     }, []);
-
-    function formatDate(date) {
-
-    if (!date) return "-";
-
-    return new Date(date + "Z").toLocaleString("en-LK", {
-        timeZone: "Asia/Colombo",
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true
-    });
-
-}
 
     const filteredHistory = useMemo(() => {
 
@@ -440,13 +424,13 @@ function History() {
 
                                                 <td className="whitespace-nowrap px-5 py-5 align-top text-sm text-slate-700">
 
-                                                    {formatDate(item.borrow_time)}
+                                                    {formatTimestamp(item.borrow_time)}
 
                                                 </td>
 
                                                 <td className="whitespace-nowrap px-5 py-5 align-top text-sm text-slate-700">
 
-                                                    {formatDate(item.return_time)}
+                                                    {formatTimestamp(item.return_time)}
 
                                                 </td>
 

@@ -27,6 +27,7 @@ function Admin() {
   const [qrOpen, setQrOpen] = useState(false);
   const [qrTitle, setQrTitle] = useState("");
   const [qrValue, setQrValue] = useState("");
+  const [qrDownloadName, setQrDownloadName] = useState("");
 
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
@@ -278,15 +279,18 @@ function Admin() {
 
   async function openQR(title, value) {
     let qrValue = value;
+    let downloadName = "";
 
     try {
       if (title === "Employee QR") {
         const result = await getEmployeeQrToken(value);
         qrValue = result.token;
+        downloadName = `employee-${value}.png`;
       }
 
       setQrTitle(title);
       setQrValue(qrValue);
+      setQrDownloadName(downloadName);
       setQrOpen(true);
     } catch (error) {
       toast.error("Failed to generate employee QR.");
@@ -536,6 +540,7 @@ function Admin() {
         onClose={() => setQrOpen(false)}
         title={qrTitle}
         value={qrValue}
+        downloadName={qrDownloadName}
       />
 
       {adminAuthOpen && (

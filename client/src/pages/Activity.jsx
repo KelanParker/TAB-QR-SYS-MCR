@@ -6,6 +6,10 @@ import {
     clearActivityLogs,
     verifyAdminPassword,
 } from "../services/api";
+import {
+    formatTimestampDate,
+    formatTimestampTime,
+} from "../utils/dateTime";
 
 function Activity() {
 
@@ -404,24 +408,13 @@ function Activity() {
 
                                                         <p className="text-sm font-medium text-slate-500">
 
-                                                            {new Date(log.created_at + "Z").toLocaleDateString("en-LK", {
-                                                                timeZone: "Asia/Colombo",
-                                                                year: "numeric",
-                                                                month: "short",
-                                                                day: "2-digit"
-                                                            })}
+                                                            {formatTimestampDate(log.created_at)}
 
                                                         </p>
 
                                                         <p className="mt-1 text-base font-semibold text-slate-950">
 
-                                                            {new Date(log.created_at + "Z").toLocaleTimeString("en-LK", {
-                                                                timeZone: "Asia/Colombo",
-                                                                hour: "2-digit",
-                                                                minute: "2-digit",
-                                                                second: "2-digit",
-                                                                hour12: true
-                                                            })}
+                                                            {formatTimestampTime(log.created_at)}
 
                                                         </p>
 

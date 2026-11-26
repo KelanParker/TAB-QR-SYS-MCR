@@ -4,6 +4,7 @@ import {
     getDashboard,
     getDashboardStats
 } from "../services/api";
+import { formatTimestamp } from "../utils/dateTime";
 
 function Dashboard() {
     const [tablets, setTablets] = useState([]);
@@ -200,7 +201,7 @@ function Dashboard() {
                                                         Borrowed at
                                                     </p>
                                                     <p className="mt-1 text-sm text-slate-600">
-                                                        {new Date(tablet.borrow_time).toLocaleString()}
+                                                        {formatTimestamp(tablet.borrow_time)}
                                                     </p>
                                                 </div>
                                             </div>
